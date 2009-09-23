@@ -9,62 +9,86 @@
 # License: you can do whatever you want with this. The author provides no warranty.
 
 
-# Read settings from config file (YAML)
 require 'yaml'
-settings = YAML::load_file('financialreport_to_html_settings.yaml')
-fields = []
-
-# Parse command line options
 require 'optparse'
+require 'erb'
 
-# This hash will hold all of the options parsed from the command-line by OptionParser.
-options = {}
-optparse = OptionParser.new do|opts|
-  # Set a banner, displayed at the top of the help screen.
-  opts.banner = "Usage: financialreport_to_html.rb [options] file1 file2 ..."
-  
-  options[:overwrite] = false
-  opts.on('-o', '--overwrite', 'Overwrite output files if they exist') do
-    options[:overwrite] = true
-  end
-  
-  # This displays the help screen, all programs are
-  # assumed to have this option.
-  opts.on( '-h', '--help', 'Display this screen' ) do
-    puts opts
+YAML_Filename = 'itunesconnect2html_settings.yaml'
+Template_Filename = 'itunesconnect2html_template.html.erb'
+
+
+
+# Read settings from config file (YAML)
+def read_settings
+  filename = File.join(File.dirname($0), File.basename(YAML_Filename))
+  unless File.file?(filename)
+    puts "Error: Settings file #{filename} does not exist."
     exit
   end
+  return YAML::load_file(filename)
 end
 
-# Parse the command-line. Remember there are two forms of the parse method. The 'parse' method simply parses
-# ARGV, while the 'parse!' method parses ARGV and removes any options found there, as well as any parameters for
-# the options. What's left is the list of files to resize.
-optparse.parse!
 
-# Exit if no file names are given on the command line
-if ARGV.empty?
-  puts optparse.help
-  exit
+# Parse command line options
+def parse_command_line
+  # This hash will hold all of the options parsed from the command-line by OptionParser.
+  options = {}
+  optparse = OptionParser.new do|opts|
+    # Set a banner, displayed at the top of the help screen.
+    opts.banner = "Usage: #{File.basename($0)} [options] file1 file2 ..."
+
+    options[:overwrite] = false
+    opts.on('-o', '--overwrite', 'Overwrite output files if they exist') do
+      options[:overwrite] = true
+    end
+
+    # This displays the help screen, all programs are
+    # assumed to have this option.
+    opts.on( '-h', '--help', 'Display this screen' ) do
+      puts opts
+      exit
+    end
+  end
+
+  # Parse the command-line. Remember there are two forms of the parse method. The 'parse' method simply parses
+  # ARGV, while the 'parse!' method parses ARGV and removes any options found there, as well as any parameters for
+  # the options. What's left is the list of files to resize.
+  optparse.parse!
+
+  # Exit if no file names are given on the command line
+  filenames = ARGV
+  if filenames.empty?
+    puts optparse.help
+    exit
+  end
+  
+  return filenames, options
 end
 
 
 # Setup ERB template. All local variables can be used in the template.
-require 'erb'
-template_filename = 'financialreport_to_html_template.html.erb'
-unless File.file?(template_filename)
-  puts "Error: ERB template #{template_filename} does not exist."
-  exit
+def init_erb_template
+  filename = File.join(File.dirname($0), File.basename(Template_Filename))
+  unless File.file?(filename)
+    puts "Error: ERB template #{filename} does not exist."
+    exit
+  end
+  return ERB.new(File.read(filename), nil, '>')
 end
-template_text = File.read(template_filename)
-template = ERB.new(template_text, nil, '>')
 
 
+
+############################
+# Start of main program flow
+settings = read_settings()
+filenames, options = parse_command_line()
+template = init_erb_template()
 
 # Loop through all files and process them
-ARGV.each do |input_filename|
+filenames.each do |input_filename|
   
   unless File.file?(input_filename)
-    puts "Error: #{input_filename} is not a file or does not exist."
+    puts "Error: #{input_filename} does not exist or is not a file."
     next
   end
   
@@ -148,6 +172,7 @@ ARGV.each do |input_filename|
       puts "Skipping #{output_filename}, file exists. Use --overwrite to override."
       next
     end
+    puts "Writing #{output_filename}"
     output_file = File.new(output_filename, "w")
     output_file.puts template.result(binding)
     output_file.close
