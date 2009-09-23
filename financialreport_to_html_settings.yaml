@@ -1,0 +1,40 @@
+Start Date:
+  type: date
+End Date:
+  type: date
+UPC:
+  exclude: true
+ISRC:           
+  exclude: true
+Vendor Identifier:
+Quantity:
+  type: integer
+Partner Share:
+  type: currency
+Extended Partner Share:
+  type: currency
+Partner Share Currency:
+  heading: Currency
+  total_amount_currency: true
+Sales or Return:
+Apple Identifier:
+Artist/Show/Developer:
+  heading: Developer
+  exclude: true
+Title:
+  exclude: true
+Label/Studio/Network/Developer:
+  exclude: true
+Grid:
+  exclude: true
+Product Type Identifier:
+  heading: Product Type ID
+ISAN/Other Identifier:
+  exclude: true
+Country Of Sale:
+Pre-order Flag:
+Promo Code:
+Customer Price:
+  type: currency
+Customer Currency:
+  heading: Currency
