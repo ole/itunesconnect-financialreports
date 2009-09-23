@@ -17,6 +17,7 @@ Partner Share Currency:
   heading: Currency
   total_amount_currency: true
 Sales or Return:
+Sale or Return:
 Apple Identifier:
 Artist/Show/Developer:
   heading: Developer
@@ -25,14 +26,26 @@ Title:
   exclude: true
 Label/Studio/Network/Developer:
   exclude: true
+Label/Studio/Network:
+  exclude: true
+Side:
+  exclude: true
 Grid:
   exclude: true
 Product Type Identifier:
   heading: Product Type ID
 ISAN/Other Identifier:
+  exclude: true       
+Account Identifier:
   exclude: true
 Country Of Sale:
 Pre-order Flag:
+Prepaid:
+  exclude: true
+Prepaid Type:
+  exclude: true
+CMA Flag:
+  exclude: true
 Promo Code:
 Customer Price:
   type: currency
