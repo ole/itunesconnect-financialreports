@@ -123,7 +123,16 @@ ARGV.each do |input_filename|
 
     # Other lines: data
     partner_share_currency = ""
-    while ((line = input_file.gets) !~ /^Total_Amount/)
+    while (line = input_file.gets)
+      # Skip if line is empty or contains only whitespace characters (such as a line of empty tabs)
+      next if line =~ /^\s*$/
+      
+      # Detect Totals row at the bottom of the table.
+      # Current format: Total_Amount:32.68
+      # Old format: \t\t\t\t\t\tTotal\t32.68 AUD\t...
+      break if (line =~ /^Total_Amount/) || (line =~ /^\s*Total\t/)
+      
+      # We have a data row: start processing
       field_values = line.split("\t")
       html << <<-EOF
           <tr>
@@ -162,7 +171,14 @@ ARGV.each do |input_filename|
     EOF
 
     # Last line: Total amount
-    total_amount = line.gsub(/Total_Amount:([-0-9.]+)/, '\1').to_f
+    if line =~ /^Total_Amount/
+      total_amount_str = line.gsub(/Total_Amount:([-0-9,.]+)/, '\1')
+      total_amount_str.gsub!(",", "")
+    elsif line =~ /^\s*Total\t/
+      total_amount_str = line.gsub(/^\s*Total\s*([-0-9,.]+).*$/, '\1')
+      total_amount_str.gsub!(",", "")
+    end
+    total_amount = total_amount_str.to_f
     total_amount_output = "Total Amount: #{"%.2f" % total_amount} #{partner_share_currency}"
     html << <<-EOF
       <p style="font-weight: bold;">#{total_amount_output}</p>
