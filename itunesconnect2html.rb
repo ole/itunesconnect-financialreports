@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -wKU
 
-# financialreport_to_html.rb
+# itunesconnect2html.rb
 # 
 # Converts iTunes Connect Financial Reports (tab-separated text files) to HTML.
 # Written by Ole Begemann, September 2009.

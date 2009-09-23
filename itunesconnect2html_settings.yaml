@@ -15,7 +15,7 @@ Extended Partner Share:
   type: currency
 Partner Share Currency:
   heading: Currency
-  total_amount_currency: true
+  total_amount_currency: true  # Do not remove this!
 Sales or Return:
 Sale or Return:
 Apple Identifier:
