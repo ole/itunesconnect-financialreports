@@ -47,6 +47,19 @@ if ARGV.empty?
   exit
 end
 
+
+# Setup ERB template. All local variables can be used in the template.
+require 'erb'
+template_filename = 'financialreport_to_html_template.html.erb'
+unless File.file?(template_filename)
+  puts "Error: ERB template #{template_filename} does not exist."
+  exit
+end
+template_text = File.read(template_filename)
+template = ERB.new(template_text, nil, '>')
+
+
+
 # Loop through all files and process them
 ARGV.each do |input_filename|
   
@@ -57,118 +70,67 @@ ARGV.each do |input_filename|
   
   File.open(input_filename, 'r') do |input_file|
 
-    html = ""
-    html << <<-EOF
-    <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-    <html>
-    <head>
-      <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-      <title>Apple Financial Report: #{File.basename(input_filename)}</title>
-      <style type="text/css">
-         body, table {
-           font: 11pt Helvetica, Arial, sans-serif;
-           width: 90%;
-         }
-         body {
-           margin: 1em;
-           padding: 0;
-           color: black;
-         }
-         h1 {
-           font-size: 130%;
-         }
-         table {
-           border-collapse: collapse;
-         }
-         tr {
-           border-bottom: 1px solid black;
-         }
-         th, td {
-           padding: 0.1cm 0.2cm;
-         }
-         @page {
-           margin: 5cm;
-         }
-      </style>
-    </head>
-
-    <body>
-      <h1>Apple Financial Report: #{File.basename(input_filename)}</h1>
-      <table>
-        <thead>
-        <tr>
-    EOF
+    page_title = "Apple Financial Report: #{File.basename(input_filename)}"
 
     # First line: headings
+    column_headers = []
     fields = []
     first_line = input_file.gets
     field_names = first_line.split("\t")
     field_names.each do |field_name|
+      field_name.strip!
+      
       # Attach config data to fields array in order of appearance in the file 
       # (or an empty hash if field is not listed or nil in config file)
       current_field = settings[field_name] || {}
       fields << current_field
-      unless current_field['exclude']
-        html << <<-EOF
-            <th>#{current_field['heading'] || field_name}</th>
-        EOF
-      end
+      
+      # Store column headers
+      column_headers << (current_field['heading'] || field_name) unless current_field['exclude']
     end
 
-    html << <<-EOF
-        </tr>
-        </thead>
-        <tbody>
-    EOF
-
     # Other lines: data
-    partner_share_currency = ""
+    data_rows = []
+    total_amount_currency = ""
     while (line = input_file.gets)
       # Skip if line is empty or contains only whitespace characters (such as a line of empty tabs)
       next if line =~ /^\s*$/
       
       # Detect Totals row at the bottom of the table.
       # Current format: Total_Amount:32.68
-      # Old format: \t\t\t\t\t\tTotal\t32.68 AUD\t...
+      # Old format (pre-Feb 2009): \t\t\t\t\t\tTotal\t32.68 AUD\t...
       break if (line =~ /^Total_Amount/) || (line =~ /^\s*Total\t/)
       
-      # We have a data row: start processing
+      # Else: we have a data row => start processing
+      row = []
       field_values = line.split("\t")
-      html << <<-EOF
-          <tr>
-      EOF
       field_values.each_with_index do |field_value, index|
+        field_value.strip!
+        field_data = { :value => field_value }
         current_field = fields[index]
         unless current_field['exclude']
+          # Modify field data according to current field settings
           case current_field['type']
             when 'date'
-              field_value = Date::parse(field_value, true).to_s
-              field_style = "text-align: right; white-space: nowrap;"
+              field_data[:value] = Date::parse(field_value, true).to_s
+              field_data[:style] = "text-align: right; white-space: nowrap;"
             when 'integer'
-              field_style = "text-align: right;"
+              field_data[:style] = "text-align: right;"
             when 'currency'
-              field_style = "text-align: right;"
-              field_value = "%.2f" % field_value.to_f
+              field_data[:style] = "text-align: right;"
+              field_data[:value] = "%.2f" % field_value.to_f
           end
-          html << <<-EOF
-              <td style="#{field_style}">#{field_value}</td>
-          EOF
-          
-          # Store partner share currency for later use in Total Amount line
-          if current_field['total_amount_currency']
-            partner_share_currency = field_value
-          end
+          row << field_data
+        end
+        
+        # Store partner share currency for later use in Total Amount line
+        if current_field['total_amount_currency']
+          total_amount_currency = field_value
         end
       end
-      html << <<-EOF
-          </tr>
-      EOF
-    end
 
-    html << <<-EOF
-        </tbody>
-      </table>
-    EOF
+      data_rows << row
+    end
 
     # Last line: Total amount
     if line =~ /^Total_Amount/
@@ -179,15 +141,7 @@ ARGV.each do |input_filename|
       total_amount_str.gsub!(",", "")
     end
     total_amount = total_amount_str.to_f
-    total_amount_output = "Total Amount: #{"%.2f" % total_amount} #{partner_share_currency}"
-    html << <<-EOF
-      <p style="font-weight: bold;">#{total_amount_output}</p>
-    EOF
-
-    html << <<-EOF
-    </body>  
-    EOF
-
+    
     # Write HTML to output file
     output_filename = input_filename.chomp(File.extname(input_filename)) + ".html"
     if (!options[:overwrite] && File.exists?(output_filename))
@@ -195,9 +149,8 @@ ARGV.each do |input_filename|
       next
     end
     output_file = File.new(output_filename, "w")
-    output_file.puts html
+    output_file.puts template.result(binding)
     output_file.close
-
   end
 
 end

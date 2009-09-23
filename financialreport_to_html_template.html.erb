@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+  <title><%= page_title %></title>
+  <style type="text/css">
+     body, table {
+       font: 11pt Helvetica, Arial, sans-serif;
+       width: 90%;
+     }
+     body {
+       margin: 1em;
+       padding: 0;
+       color: black;
+     }
+     h1 { font-size: 130%; }
+     table { border-collapse: collapse; }
+     tr { border-bottom: 1px solid black; }
+     th, td { padding: 0.1cm 0.2cm; }
+  </style>
+</head>
+
+<body>
+  <h1><%= page_title %></h1>
+  <table>
+    <thead>
+      <tr>
+        <% column_headers.each do |column_header| %>
+        <th><%= column_header %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% data_rows.each do |row| %>
+      <tr>
+        <% row.each do |field_data| %>
+        <td<%= " style=\"#{field_data[:style]}\"" if field_data[:style] %>><%= field_data[:value] %></td>
+        <% end %>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <p style="font-weight: bold;">Total Amount: <%= "#{"%.2f" % total_amount} #{total_amount_currency}" %></p>
+</body>
