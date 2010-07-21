@@ -4,8 +4,8 @@ iTunesConnect to HTML
 A Ruby script to convert the plain text Financial Reports Apple provides to
 App Store developers in iTunes Connect to pretty HTML tables.
 
-Works with Apple's current (Aug 2009) file format and the previous version
-(pre-Feb 2009).
+Works with Apple's current (as of June 2010) file format and the previous versions
+(pre-Jun 2010 and pre-Feb 2009).
 
 
 Usage
@@ -48,7 +48,7 @@ Credits and License
 -------------------
 
 Written by Ole Begemann, September 2009.
-Copyright 2009 Ole Begemann.
+Copyright 2009-2010 Ole Begemann.
 http://oleb.net/blog/2009/09/formatting-itunes-connect-financial-reports
 
 License: You can do whatever you want with this. The author provides no 
