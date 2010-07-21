@@ -4,6 +4,8 @@ End Date:
   type: date
 UPC:
   exclude: true
+ISRC/ISBN:
+  exclude: true
 ISRC:           
   exclude: true
 Vendor Identifier:
@@ -19,10 +21,15 @@ Partner Share Currency:
 Sales or Return:
 Sale or Return:
 Apple Identifier:
+Artist/Show/Developer/Author:
+  heading: Developer
+  exclude: true
 Artist/Show/Developer:
   heading: Developer
   exclude: true
 Title:
+  exclude: true
+Label/Studio/Network/Developer/Publisher:
   exclude: true
 Label/Studio/Network/Developer:
   exclude: true

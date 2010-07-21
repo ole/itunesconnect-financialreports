@@ -40,5 +40,11 @@
       <% end %>
     </tbody>
   </table>
+  <% if total_rows != 0 %>
+    <p style="font-weight: bold;">Total Rows: <%= "#{"%.0f" % total_rows}" %></p>
+  <% end %>
   <p style="font-weight: bold;">Total Amount: <%= "#{"%.2f" % total_amount} #{total_amount_currency}" %></p>
+  <% if total_units != 0 %>
+    <p style="font-weight: bold;">Total Units: <%= "#{"%.0f" % total_units}" %></p>
+  <% end %>
 </body>

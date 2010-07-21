@@ -121,9 +121,33 @@ filenames.each do |input_filename|
       next if line =~ /^\s*$/
       
       # Detect Totals row at the bottom of the table.
-      # Current format: Total_Amount:32.68
+      # Current format: Total_Amount\t32.68
+      # Old format (pre-Jun 2010): Total_Amount:32.68
       # Old format (pre-Feb 2009): \t\t\t\t\t\tTotal\t32.68 AUD\t...
-      break if (line =~ /^Total_Amount/) || (line =~ /^\s*Total\t/)
+      if (line =~ /^Total/) || (line =~ /^\s*Total\t/)
+        if line =~ /^Total_Amount/
+          total_amount_str = line.gsub(/Total_Amount[:\s]*([-0-9,.]+)/, '\1')
+          total_amount_str.gsub!(",", "")
+        elsif line =~ /^\s*Total\t/
+          total_amount_str = line.gsub(/^\s*Total\s*([-0-9,.]+).*$/, '\1')
+          total_amount_str.gsub!(",", "")
+        end
+        total_amount = total_amount_str.to_f
+
+        if line =~ /^Total_Units/
+          total_units_str = line.gsub(/Total_Units\s*([-0-9,.]+)/, '\1')
+          total_units_str.gsub!(",", "")
+        end
+        total_units = total_units_str.to_f
+
+        if line =~ /^Total_Rows/
+          total_rows_str = line.gsub(/Total_Rows\s*([-0-9,.]+)/, '\1')
+          total_rows_str.gsub!(",", "")
+        end
+        total_rows = total_rows_str.to_f
+
+        next
+      end
       
       # Else: we have a data row => start processing
       row = []
@@ -156,16 +180,6 @@ filenames.each do |input_filename|
       data_rows << row
     end
 
-    # Last line: Total amount
-    if line =~ /^Total_Amount/
-      total_amount_str = line.gsub(/Total_Amount:([-0-9,.]+)/, '\1')
-      total_amount_str.gsub!(",", "")
-    elsif line =~ /^\s*Total\t/
-      total_amount_str = line.gsub(/^\s*Total\s*([-0-9,.]+).*$/, '\1')
-      total_amount_str.gsub!(",", "")
-    end
-    total_amount = total_amount_str.to_f
-    
     # Write HTML to output file
     output_filename = input_filename.chomp(File.extname(input_filename)) + ".html"
     if (!options[:overwrite] && File.exists?(output_filename))
