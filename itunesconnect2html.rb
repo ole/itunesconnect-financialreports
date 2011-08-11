@@ -160,7 +160,7 @@ filenames.each do |input_filename|
           # Modify field data according to current field settings
           case current_field['type']
             when 'date'
-              field_data[:value] = Date::parse(field_value, true).to_s
+              field_data[:value] = Date.strptime(field_value, '%m/%d/%Y').to_s
               field_data[:style] = "text-align: right; white-space: nowrap;"
             when 'integer'
               field_data[:style] = "text-align: right;"
