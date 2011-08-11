@@ -31,9 +31,9 @@
       </tr>
     </thead>
     <tbody>
-      <% data_rows.each do |row| %>
+      <% data_rows.each do |the_row| %>
       <tr>
-        <% row.each do |field_data| %>
+        <% the_row.each do |field_data| %>
         <td<%= " style=\"#{field_data[:style]}\"" if field_data[:style] %>><%= field_data[:value] %></td>
         <% end %>
       </tr>
