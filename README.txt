@@ -5,7 +5,8 @@ A Ruby script to convert the plain text Financial Reports Apple provides to
 App Store developers in iTunes Connect to pretty HTML tables.
 
 Works with Apple's current (as of June 2010) file format and the previous versions
-(pre-Jun 2010 and pre-Feb 2009).
+(pre-Jun 2010 and pre-Feb 2009). Also works with new All Terrotories (Single File)
+download (July 2018).
 
 
 Usage
