@@ -43,8 +43,31 @@
   <% if total_rows != 0 %>
     <p style="font-weight: bold;">Total Rows: <%= "#{"%.0f" % total_rows}" %></p>
   <% end %>
-  <p style="font-weight: bold;">Total Amount: <%= "#{"%.2f" % total_amount} #{total_amount_currency}" %></p>
+  <% if total_amount != 0 %>
+    <p style="font-weight: bold;">Total Amount: <%= "#{"%.2f" % total_amount} #{total_amount_currency}" %></p>
+  <% end %>
   <% if total_units != 0 %>
     <p style="font-weight: bold;">Total Units: <%= "#{"%.0f" % total_units}" %></p>
   <% end %>
+
+  <% if summary_rows.count != 0 %>
+    <table>
+      <thead>
+        <tr>
+          <% summary_column_headers.each do |column_header| %>
+          <th><%= column_header %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% summary_rows.each do |the_row| %>
+        <tr>
+          <% the_row.each do |field_data| %>
+          <td<%= " style=\"#{field_data[:style]}\"" if field_data[:style] %>><%= field_data[:value] %></td>
+          <% end %>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% end %>
 </body>

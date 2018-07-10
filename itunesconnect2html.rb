@@ -113,6 +113,12 @@ filenames.each do |input_filename|
       column_headers << (current_field['heading'] || field_name) unless current_field['exclude']
     end
 
+    # Summary data for combined report
+    in_summary_table = false
+    summary_column_headers = []
+    summary_fields = []
+    summary_rows = []
+
     # Other lines: data
     data_rows = []
     total_amount_currency = ""
@@ -148,6 +154,26 @@ filenames.each do |input_filename|
 
         next
       end
+
+      # Detect summary table
+      if (line =~ /^Country/)
+        summary_field_names = line.split("\t")
+        summary_field_names.each do |field_name|
+          field_name.strip!
+
+          # Attach config data to fields array in order of appearance in the file 
+          # (or an empty hash if field is not listed or nil in config file)
+          current_field = settings[field_name] || {}
+          summary_fields << current_field
+      
+          # Store column headers
+          summary_column_headers << (current_field['heading'] || field_name) unless current_field['exclude']
+        end
+
+        # Start parsing summary lines
+        in_summary_table = true
+        next
+      end
       
       # Else: we have a data row => start processing
       row = []
@@ -155,7 +181,11 @@ filenames.each do |input_filename|
       field_values.each_with_index do |field_value, index|
         field_value.strip!
         field_data = { :value => field_value }
-        current_field = fields[index]
+        if (in_summary_table)
+          current_field = summary_fields[index]
+        else
+          current_field = fields[index]
+        end
         unless current_field['exclude']
           # Modify field data according to current field settings
           case current_field['type']
@@ -177,7 +207,11 @@ filenames.each do |input_filename|
         end
       end
 
-      data_rows << row
+      if (in_summary_table)
+        summary_rows << row
+      else
+        data_rows << row
+      end
     end
 
     # Write HTML to output file
